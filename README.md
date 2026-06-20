@@ -6,6 +6,8 @@
 > recurrence and proposes the known fix** — autonomously, in the **Enter Pro**
 > environment, with a heads-up in **Slack**.
 
+**▶ Live dashboard:** https://kristiankuismin-lgtm.github.io/regression-memory-debugger/ — paste a bug and watch the agent recall the fix in your browser (same logic as the Python agent).
+
 Most coding agents are stateless: they re-debug the same regression every time it
 reappears under slightly different wording. This agent gets *smarter every time a
 bug is resolved*, because the fix is written to memory and recalled on the next
