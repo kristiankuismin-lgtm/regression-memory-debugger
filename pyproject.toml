@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "regression-memory-debugger"
+version = "0.1.0"
+description = "A sentient debugging agent: remembers past fixes (Parcle) and applies them on recurrence (Enter Pro)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+server = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "pydantic>=2.6"]
+parcle = ["parcle"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+regression-debugger = "regression_debugger.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["regression_debugger*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

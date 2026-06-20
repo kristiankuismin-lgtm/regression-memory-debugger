@@ -1,0 +1,8 @@
+# Core runtime is dependency-free (stdlib only) for the local/offline mode.
+# These are needed only for the webhook server:
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+
+# Optional — enable the real Parcle long-term memory backend:
+#   pip install parcle

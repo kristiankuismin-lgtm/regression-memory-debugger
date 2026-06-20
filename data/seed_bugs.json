@@ -1,0 +1,82 @@
+[
+  {
+    "id": "BUG-1042",
+    "title": "Duplicate companies in search results",
+    "symptom": "A search returns the same company several times with slightly different names.",
+    "root_cause": "Dedup key used the company name only, so normalized-name collisions slipped through.",
+    "fix": "Switch the dedup key to canonical domain + registry id, and add a fuzzy-name fold step.",
+    "files": ["search/dedup.ts", "search/normalize.ts"],
+    "tags": ["search", "dedup", "data-quality"],
+    "created_at": "2026-03-04T09:00:00+00:00"
+  },
+  {
+    "id": "BUG-1057",
+    "title": "Size filter leaks out-of-range companies",
+    "symptom": "Filtering by employee size still returns companies clearly outside the selected band.",
+    "root_cause": "Size band applied to a stale denormalized field instead of the latest headcount snapshot.",
+    "fix": "Filter on the current headcount snapshot and reindex; add a guard test for band edges.",
+    "files": ["search/filters/size.ts", "index/headcount.ts"],
+    "tags": ["search", "filters", "data-quality"],
+    "created_at": "2026-03-11T13:20:00+00:00"
+  },
+  {
+    "id": "BUG-1063",
+    "title": "Stale deal valuations shown as current",
+    "symptom": "Deal pages display old valuation figures that disagree with the latest filings.",
+    "root_cause": "Valuation cache TTL was effectively infinite; refresh job silently failed on auth.",
+    "fix": "Set a 24h TTL, alert on refresh-job failures, and prefer filing-sourced values for public acquirers.",
+    "files": ["deals/valuation_cache.ts", "jobs/refresh_valuations.ts"],
+    "tags": ["deals", "cache", "data-quality"],
+    "created_at": "2026-03-19T08:45:00+00:00"
+  },
+  {
+    "id": "BUG-1071",
+    "title": "Category drift in industry tagging",
+    "symptom": "Companies get tagged into adjacent but wrong industry categories over time.",
+    "root_cause": "Classifier confidence threshold too low; low-confidence tags were auto-applied.",
+    "fix": "Raise the auto-apply threshold and route low-confidence tags to a review queue.",
+    "files": ["tagging/classifier.ts", "tagging/review_queue.ts"],
+    "tags": ["tagging", "classification", "data-quality"],
+    "created_at": "2026-03-25T15:10:00+00:00"
+  },
+  {
+    "id": "BUG-1088",
+    "title": "Slack webhook returns 401",
+    "symptom": "Notifications stopped posting to Slack and the logs show repeated 401 errors.",
+    "root_cause": "Rotated Slack signing secret was not picked up; old secret cached in the worker.",
+    "fix": "Read the signing secret per-request from the secret store and drop the in-process cache.",
+    "files": ["notify/slack.ts", "config/secrets.ts"],
+    "tags": ["slack", "auth", "integration"],
+    "created_at": "2026-04-02T11:00:00+00:00"
+  },
+  {
+    "id": "BUG-1094",
+    "title": "PostHog webhook signature mismatch",
+    "symptom": "Incoming PostHog events are rejected with an HMAC signature verification failure.",
+    "root_cause": "Body was parsed to JSON before computing the HMAC, changing the raw bytes.",
+    "fix": "Compute HMAC over the raw request body buffer before any parsing.",
+    "files": ["webhooks/posthog.ts", "lib/hmac.ts"],
+    "tags": ["posthog", "webhook", "hmac", "integration"],
+    "created_at": "2026-04-09T10:30:00+00:00"
+  },
+  {
+    "id": "BUG-1102",
+    "title": "Session classifier times out on long sessions",
+    "symptom": "Classifying very long user sessions intermittently times out and drops the result.",
+    "root_cause": "Whole session sent in one model call; payload exceeded the timeout budget.",
+    "fix": "Chunk the session, classify chunks in parallel, and merge with a reducer step.",
+    "files": ["agent/classifySession.ts", "agent/functions.ts"],
+    "tags": ["agent", "timeout", "performance"],
+    "created_at": "2026-04-16T14:05:00+00:00"
+  },
+  {
+    "id": "BUG-1110",
+    "title": "Daily digest posts twice",
+    "symptom": "The daily frustration-signal digest is delivered to the channel two times.",
+    "root_cause": "Scheduler ran on two replicas without a distributed lock.",
+    "fix": "Add an idempotency key per day and a short-lived distributed lock around the job.",
+    "files": ["jobs/daily_digest.ts", "lib/lock.ts"],
+    "tags": ["scheduler", "idempotency", "slack"],
+    "created_at": "2026-04-23T07:50:00+00:00"
+  }
+]
